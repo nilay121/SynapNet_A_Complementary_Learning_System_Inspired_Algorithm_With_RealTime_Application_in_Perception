@@ -2,6 +2,9 @@
 
 Application of the SynapNet algorithm to classify a wide range of objects incrementally in a real-time dynamic environment using a soft pneumatic gripper equipped with two flex sensors and two force sensors. More details about the application are provided in the paper "".
 
+<p align="center">
+  <img src="https://github.com/nilay121/SynapNet_ApplicationOnGripper/blob/main/IMG_20230703_122715.jpg" width="350" alt="accessibility text">
+</p>
 
 ## Dataset
 
