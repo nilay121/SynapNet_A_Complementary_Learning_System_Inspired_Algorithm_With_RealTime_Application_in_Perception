@@ -35,11 +35,8 @@ class VAE(nn.Module):
         self.latent_embedding = latent_embedding
         self.input_dim = input_dim
         self.device = device
-        # self.batch_sizeGR = batch_sizeGR
-        # self.data_width=self.data_height=14
         
         self.encoder = nn.Sequential(
-                # Reshape(self.batch_sizeGR,1,self.data_width,self.data_height),
                 nn.Conv1d(in_channels=self.input_dim, out_channels=512, kernel_size=3, stride=1, padding=1),
                 nn.BatchNorm1d(num_features=512),
                 nn.LeakyReLU(0.01,inplace=False),

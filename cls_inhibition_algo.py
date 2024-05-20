@@ -1,8 +1,3 @@
-'''
-BioINet (Biological Inspired Network) is Biological Inspired Complementary Learning System implementation with a fast Learner (hippocampus), 
-a slow learner (Neocortex), lateral Inhibition and a sleep phase for re-organizing the memories.
-
-'''
 from torch.utils.data import DataLoader
 import torch
 import numpy as np
@@ -91,7 +86,8 @@ class CustomInhibitStrategy():
         loss = 0 
 
         # transformation on the buffer data
-        buffer_inputs, buffer_labels = utility_funcs.get_dataBuffer(buffer_data=buf_inputs,buffer_labels=buf_labels,size=self.mini_batchGR,device=self.device,transform=self.train_transformBuffer)
+        buffer_inputs, buffer_labels = utility_funcs.get_dataBuffer(buffer_data=buf_inputs,buffer_labels=buf_labels,size=self.mini_batchGR,
+                                                                    device=self.device,transform=self.train_transformBuffer)
         buffer_inputs = buffer_inputs.reshape(-1,self.feature_dim, self.seq_len).to(self.device)
         buffer_labels = buffer_labels.to(self.device)
 
@@ -160,7 +156,9 @@ class CustomInhibitStrategy():
 
     for i in range(epochs):
       for j in range(batch_epochs):
-        buffer_inputs, buffer_labels = utility_funcs.get_dataBuffer(buffer_data=buf_inputs,buffer_labels=buf_labels,size=offline_batch,device=self.device,transform=self.train_transformBuffer)
+        buffer_inputs, buffer_labels = utility_funcs.get_dataBuffer(buffer_data=buf_inputs,buffer_labels=buf_labels,
+                                                                    size=offline_batch,device=self.device,
+                                                                    transform=self.train_transformBuffer)
         buffer_inputs = buffer_inputs.reshape(-1,self.feature_dim, self.seq_len).to(self.device)
         buffer_labels = buffer_labels.to(self.device)
 

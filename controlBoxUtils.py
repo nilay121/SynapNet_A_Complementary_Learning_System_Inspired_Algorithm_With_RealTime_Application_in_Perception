@@ -16,7 +16,7 @@ class GripperData:
     # ------------------------ COMMUNICATION ------------------------ #
     def set_communication(self, aportPB):
         try:
-            self.arduinoPB = serial.Serial( # set parameters, in fact use your own :-)
+            self.arduinoPB = serial.Serial( 
                                 port=aportPB,
                                 baudrate=115200,
                                 timeout=.1 
@@ -37,14 +37,13 @@ class GripperData:
         packet = np.array([106,U1,U2,U3,L1,L2,L3,G],dtype = np.uint8)
         
         if self.arduinoPB.isOpen():
-            for value in packet : #Envoi des données
-                #print(value)
+            for value in packet : 
                 s = struct.pack('!{0}B'.format(len(packet)), *packet)
                 self.arduinoPB.write(s)
 
     def Syn_PressureSenValues(self, p_value, aportPB, aportFS, baudrateFS, time_delay, max_counter, object, counterFSThreshold = 6):
         counter = 0
-        PMAX = 13 # which maps to about 1.4 bars
+        PMAX = 13 
         SensorData = []
         counterFS = 0
         counterFSThreshold = counterFSThreshold
@@ -104,7 +103,8 @@ class GripperData:
         return SensorData
 
     def SensorDataCreation(self, SensorData, filename, training):
-        SensorValuesDataFrame = pd.DataFrame(SensorData, columns=['Iterations', 'SensorVal1', 'SensorVal2', 'SensorVal3', 'SensorVal4', 'object'])
+        SensorValuesDataFrame = pd.DataFrame(SensorData, 
+                                             columns=['Iterations', 'SensorVal1', 'SensorVal2', 'SensorVal3', 'SensorVal4', 'object'])
         if training:
             filename_dir = f"dataset/Uk_data/train/{filename}"
             backuData_dir = f"dataset/Known_data/BP_SensorDataUkAdd.csv"

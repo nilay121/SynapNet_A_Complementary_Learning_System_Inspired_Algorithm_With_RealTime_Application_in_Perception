@@ -1,5 +1,5 @@
 '''
-BioINet (Biological Inspired Network) is Biological Inspired Complementary Learning System implementation with a fast Learner (hippocampus), 
+SynapNet is Brain Inspired Complementary Learning System implementation with a fast Learner (hippocampus), 
 a slow learner (Neocortex), lateral Inhibition and a sleep phase for re-organizing the memories.
 '''
 
@@ -43,13 +43,13 @@ class SynapNet():
         self.n_experiences=5 
         self.batch_sizeCLS = 4
         self.mini_batchGR = 8
-        self.offline_batch = 32 #32  4
+        self.offline_batch = 32 
 
-        self.stable_model_update_freq = 0.25#0.15000000000000002
+        self.stable_model_update_freq = 0.25
         self.plastic_model_update_freq = 0.85
         self.reg_weight = 1e-5
-        self.stable_model_alpha = 0.30000000000000004#0.45000000000000007
-        self.plastic_model_alpha = 0.9#0.8
+        self.stable_model_alpha = 0.30000000000000004
+        self.plastic_model_alpha = 0.9
 
         self.patience = 45
         self.learning_rate=1e-5  
@@ -64,18 +64,19 @@ class SynapNet():
         self.input_featureDim = 600
         self.latent_embedding = 100
 
-        self.num_syntheticExamplesPerDigit = 7#10
-        self.num_originalExamplesPerDigit = 7#10
+        self.num_syntheticExamplesPerDigit = 7
+        self.num_originalExamplesPerDigit = 7
 
     def singleRun(self, Uk_classExpPhase=False):
         tactileData = pd.read_csv("dataset/Known_data/BP_SensorData.csv", sep=",")
-        self.labels = ['solid_square', 'solid_cylinder', 'stapler', 'airpods_case', 'gluestick', 'bottle', 'rectangular_block', 'hollow_cylinder',
-       'airpods', 'mobile_phone', 'smart_watch', 'air_guage', 'big_cuboid', 'plier', 'ball']      
+        self.labels = ['solid_square', 'solid_cylinder', 'stapler', 'airpods_case', 'gluestick', 'bottle', 'rectangular_block', 
+                       'hollow_cylinder', 'airpods', 'mobile_phone', 'smart_watch', 'air_guage', 'big_cuboid', 'plier', 'ball']      
 
         modifiedData = []
         modifiedLabels = []
         for i in range(len(self.labels)):
-            dataToTransform = np.array(tactileData.loc[tactileData['object'] == self.labels[i], ['SensorVal1', 'SensorVal2', 'SensorVal3', 'SensorVal4']])
+            dataToTransform = np.array(tactileData.loc[tactileData['object'] == self.labels[i], 
+                                                       ['SensorVal1', 'SensorVal2', 'SensorVal3', 'SensorVal4']])
             for j in range(0,dataToTransform.shape[0],150):
                 tempTrans = dataToTransform[j:j+150].reshape(1,-1)
                 modifiedLabels.append(i)
@@ -110,15 +111,16 @@ class SynapNet():
 
         ## Initialize CLS model
         self.cl_strategy = CustomInhibitStrategy(working_model=WorkingModel,modelstable=StableModel,modelplastic=PlasticModel,\
-        stable_model_update_freq=self.stable_model_update_freq,plastic_model_update_freq=self.plastic_model_update_freq,\
+        stable_model_update_freq=self.stable_model_update_freq,plastic_model_update_freq=self.plastic_model_update_freq,
         num_epochs=self.num_epochs,reg_weight=self.reg_weight,batch_size=self.batch_sizeCLS,n_classes=self.n_classes,
-        n_channel=self.input_featureDim, patience=self.patience,learning_rate=self.learning_rate,plastic_model_alpha=self.plastic_model_alpha,
-        stable_model_alpha=self.stable_model_alpha, mini_batchGR=self.mini_batchGR,clipping=self.clipping) #CLS strategy
+        n_channel=self.input_featureDim, patience=self.patience,learning_rate=self.learning_rate,
+        plastic_model_alpha=self.plastic_model_alpha, stable_model_alpha=self.stable_model_alpha, 
+        mini_batchGR=self.mini_batchGR,clipping=self.clipping) #CLS strategy
 
         ## Initialize Generator model
         gen_model = VAE(input_dim=self.input_featureDim, latent_embedding=self.latent_embedding, device=self.device).to(device=self.device)
-        gen_class = Vae_Cls_Generator(num_epochs=self.num_epochsGR, model=gen_model, device=self.device, learning_rate=self.learning_rateGR, batch_size=self.batch_sizeGR, 
-                                      patience=self.patienceGR, )
+        gen_class = Vae_Cls_Generator(num_epochs=self.num_epochsGR, model=gen_model, device=self.device, learning_rate=self.learning_rateGR, 
+                                      batch_size=self.batch_sizeGR, patience=self.patienceGR, )
 
         ## Train and Evaluate
         print('Starting experiment...')
@@ -151,7 +153,8 @@ class SynapNet():
                     print("Starting offline learning for reorganizing memories")
                     stable_model, plastic_model, working_model = self.cl_strategy.offline_reorganizing(buf_inputs=self.buffer_images,
                                                                                                        buf_labels=self.buffer_labels,
-                                                                                                       epochs=30,lr_offline=1e-4,offline_batch=self.offline_batch) 
+                                                                                                       epochs=30,lr_offline=1e-4,
+                                                                                                       offline_batch=self.offline_batch) 
                     print("Reorganization done")
             else:
                 self.cl_strategy = torch.load("models/cl_strategy.pickle")
@@ -176,7 +179,7 @@ class SynapNet():
         return y_stable, y_plastic, cls_output, self.n_experiences, self.test_stream, self.n_classes
 
 def main():
-    Uk_classExpPhase = True
+    Uk_classExpPhase = False
     stablePredN = []
     plasticPredN = []
     cls_outputPredN = []
@@ -230,16 +233,15 @@ def main():
             time.sleep(1)
             main()
         else:
-            y_stableAkt, y_plasticAkt, cls_outputAkt, knownLabelsList = utility_funcs.OnlineTest(threshold = 0.30, expTestStream = test_streamExp, 
+            y_stableAkt, y_plasticAkt, cls_outputAkt, knownLabelsList = utility_funcs.OnlineTest(threshold = 0.30, 
+                                                                                expTestStream = test_streamExp, 
                                                                                 labelsUk_trainTest = newClass, 
                                                                                 totalClasses=  n_classes, num_syntheticExamplesPerDigit = 10, 
-                                                                                acquisition_function = data_acquisition, knownLabelsList=knownLabelsListInitial,
+                                                                                acquisition_function = data_acquisition, 
+                                                                                knownLabelsList=knownLabelsListInitial,
                                                                                 customCLSobj = CustomInhibitStrategy, aportFS="COM4", 
                                                                                 num_originalExamplesPerDigit = 5,
                                                                                 aportPB="COM3", train_itr=10, test_itr=3, in_dim=600)
-        ## Plot after training on the known data
-        # utility_funcs.barPlotMeanPredUK(y_plotPlastic= y_plasticAkt, y_plotStable = y_stableAkt, 
-        #                                 y_clsOutput= cls_outputAkt, n_experinces = n_experiences+1)
         print(f"The classes seen so far are {knownLabelsList}")
         utility_funcs.writeList(knownLabelsList)
 

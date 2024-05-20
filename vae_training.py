@@ -26,23 +26,15 @@ class Vae_Cls_Generator:
 
     train_dataset = cl_exp.dataset
     train_loader = DataLoader(train_dataset, batch_size=self.batch_size,shuffle=False)
+    
     for epoch in range(self.num_epochs):
         self.model.train()
-        #loader_loop = tqdm(train_loader,leave=False)
         for data in train_loader:
           features = data[0].to(self.device) 
-          # if len(buff_images) > 0:
-          #   buffer_images = torch.as_tensor(np.array(buff_images))
-          #   buffer_images = buffer_images.squeeze(2).reshape(-1,1,synthetic_imgHeight,synthetic_imgWidth).to(self.device)
-          #   features = buffer_images
           features = features.reshape(-1, 600, self.seq_len)
-
-          # FORWARD AND BACK PROP
+          # Forward and back propagation
           encoded, z_mean, z_log_var, decoded = self.model(features)
-
-          '''
-          negative sign to make the KL div loss to be positive.
-          '''
+          # negative sign to make the KL div loss to be positive.
           kl_div = -0.5 * torch.sum(1 + z_log_var 
                                     - z_mean**2 
                                     - torch.exp(z_log_var), 
@@ -59,11 +51,8 @@ class Vae_Cls_Generator:
           optimizer.zero_grad()
 
           loss.backward()
-
-          # UPDATE MODEL PARAMETERS
+          # Update model parameters
           optimizer.step()
-          # loader_loop.set_description(f"Epoch {epoch}/{self.num_epochs}")
-          # loader_loop.set_postfix(loss = loss.item())
         if epoch%25 ==0:
           print("epoch is ",epoch,"loss is ", loss.item())
         scheduler.step(loss)

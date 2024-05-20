@@ -212,14 +212,8 @@ class utility_funcs:
         if training == True:
             ## For unknown train data
             for i in range(len(labelsTT)):
-            #     newIdx = (len_labelsExp+i)
-            #     print("labelsssss!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!", trained_labelsExp)
-            #     for k in range(len(trained_labelsExp)):
-            #         if (trained_labelsExp[k] == labelsUk_trainTest):
-            #             print("Same object found!!!index is", k)
-            #             newIdx = k
-            #             print("object name is ", trained_labelsExp[newIdx])
-                dataToTransform = np.array(sensorData.loc[sensorData['object'] == labelsTT[i], ['SensorVal1', 'SensorVal2', 'SensorVal3', 'SensorVal4']])
+                dataToTransform = np.array(sensorData.loc[sensorData['object'] == labelsTT[i], 
+                                                          ['SensorVal1', 'SensorVal2', 'SensorVal3', 'SensorVal4']])
                 for j in range(0,dataToTransform.shape[0],150):
                     tempTrans = dataToTransform[j:j+150].reshape(1,-1)
                     ExpLabelsSep.append(newIdx) # add the indices of already trained classes
@@ -237,14 +231,8 @@ class utility_funcs:
         elif training == False:
             ## For unknown test data
             for i in range(len(labelsTT)):
-                # newIdx = (len_labelsExp+i)
-                # print("labelsssss!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!", trained_labelsExp)
-                # for k in range(len(trained_labelsExp)):
-                #     if (trained_labelsExp[k] == labelsUk_trainTest):
-                #         print("Same object found!!!index", k)
-                #         newIdx = k
-                #         print("object name is ", trained_labelsExp[newIdx])
-                dataToTransform = np.array(sensorData.loc[sensorData['object'] == labelsTT[i], ['SensorVal1', 'SensorVal2', 'SensorVal3', 'SensorVal4']])
+                dataToTransform = np.array(sensorData.loc[sensorData['object'] == labelsTT[i], 
+                                                          ['SensorVal1', 'SensorVal2', 'SensorVal3', 'SensorVal4']])
                 for j in range(0,dataToTransform.shape[0],150):
                     tempTrans = dataToTransform[j:j+150].reshape(1,-1)
                     ExpLabelsSep.append(newIdx) # add the indices of already trained classes
@@ -314,7 +302,7 @@ class utility_funcs:
     # def optimizerStatesChange(self,):
     '''
         We experimented with the optimizer by saving its state before the number of classes exceeded the original fixed threshold,
-        but since we the working model is only optimized during training and it doesn't require to remember the old task so 
+        but since the working model is only optimized during training and it doesn't require to remember the old task so 
         we removed this function and train the working model from scratch during newThresholdExceedExpCase
 
     '''
@@ -352,8 +340,9 @@ class utility_funcs:
         linear1bias = newModel['model.linear1.bias'].to(self.device)
 
         # Random weight and bias
-        torch_randTensor_weight = torch.rand((1,linear1Weight.shape[1]), requires_grad=True, device=self.device)*1e-10 ## random weight for new class
-        torch_randTensor_bias = torch.rand((1), requires_grad=True, device=self.device)*1e-3 ## random bias for new class
+        ## random weight and bias for new class
+        torch_randTensor_weight = torch.rand((1,linear1Weight.shape[1]), requires_grad=True, device=self.device)*1e-10 
+        torch_randTensor_bias = torch.rand((1), requires_grad=True, device=self.device)*1e-3 
 
         # modified weight and bias
         modifiedWeightTensor = torch.cat((linear1Weight, torch_randTensor_weight), axis=0)
@@ -374,7 +363,8 @@ class utility_funcs:
         return finalModel
 
     def OnlineTest(self, threshold, expTestStream, labelsUk_trainTest, num_syntheticExamplesPerDigit, customCLSobj, 
-                   acquisition_function, totalClasses, knownLabelsList, num_originalExamplesPerDigit, in_dim, aportPB="COM3", aportFS="COM4", train_itr=50, 
+                   acquisition_function, totalClasses, knownLabelsList, num_originalExamplesPerDigit, in_dim, 
+                   aportPB="COM3", aportFS="COM4", train_itr=50, 
                    test_itr=3):
         ## Parameters
         batch_sizeGR = 16
@@ -416,18 +406,19 @@ class utility_funcs:
                                                 stable_model_alpha=0.30000000000000004, mini_batchGR=8, clipping=True, archiChange=True)
         ## Test phase
         # buffer_images, buffer_labels, cl_strategy, gen_model = self.loadObj()
-        gen_class = Vae_Cls_Generator(num_epochs=num_epochs, model=gen_model, device=self.device, learning_rate=learning_rateGR, batch_size=batch_sizeGR, 
-                                patience=100 )
+        gen_class = Vae_Cls_Generator(num_epochs=num_epochs, model=gen_model, device=self.device, learning_rate=learning_rateGR, 
+                                      batch_size=batch_sizeGR, patience=100 )
         ## Data collection in real time for testing
         testFileName = acquisition_function.StartExpGeneration(itr=test_itr, filename=f"test_object{labelsUk_trainTest}.csv", 
-                                                               aportPB=aportPB, aportFS=aportFS, uk_objectName = labelsUk_trainTest, training=False)
+                                                               aportPB=aportPB, aportFS=aportFS, uk_objectName = labelsUk_trainTest, 
+                                                               training=False)
         testDataUk = self.Uk_dataTrainTest(sensorDataFile=testFileName, labelsUk_trainTest=labelsUk_trainTest, 
                                            trained_labelsExp=knownLabelsList, training=False, newIdx=newIdx)
-        
         # newClasses = len(pd.Series(testDataUk.targets).unique())
         acc_dict, modelPred, _ = cl_strategy.evaluateUnknown(batch_size=32, test_stream=testDataUk)
-
-        self.predictionLabels(pred= modelPred[0], labelsList= knownLabelsList) ################## test new
+        
+        ################## test new
+        self.predictionLabels(pred= modelPred[0], labelsList= knownLabelsList) 
 
         y_stable, y_plastic, cls_output = self.dataPrepToPlot(acc_dict)
         
@@ -441,7 +432,8 @@ class utility_funcs:
             print("#"*10,"Collecting real time data from the gripper","#"*10)
             ## Data collection in real time for training
             trainFileName = acquisition_function.StartExpGeneration(itr=train_itr, filename=f"train_object{labelsUk_trainTest}.csv", 
-                                                               aportPB=aportPB, aportFS=aportFS, uk_objectName = labelsUk_trainTest, training=True)            
+                                                               aportPB=aportPB, aportFS=aportFS, uk_objectName = labelsUk_trainTest, 
+                                                               training=True)            
             print("#"*10,"Collection complete!! Loading the data!!","#"*10)
             trainDataUk = self.Uk_dataTrainTest(sensorDataFile=trainFileName, labelsUk_trainTest=labelsUk_trainTest, 
                                                 trained_labelsExp=knownLabelsList, training=True, newIdx=newIdx)
