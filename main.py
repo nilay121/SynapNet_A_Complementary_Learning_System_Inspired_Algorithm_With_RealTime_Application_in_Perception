@@ -3,39 +3,29 @@ SynapNet is Brain Inspired Complementary Learning System implementation with a f
 a slow learner (Neocortex), lateral Inhibition and a sleep phase for re-organizing the memories.
 '''
 
+import torch
+import torchvision
+import time
+import numpy as np
+import pandas as pd
+from vae_model import VAE
+import matplotlib.pyplot as plt
 from plasticModel import PlasticModel
 from workingModel import WorkingModel 
 from stableModel import StableModel
-from avalanche.benchmarks.classic import SplitMNIST,SplitFMNIST
-import numpy as np
-import matplotlib.pyplot as plt
-from cls_inhibition_algo import CustomInhibitStrategy
-import torch
-import torchvision
-from avalanche.benchmarks.datasets import MNIST, FashionMNIST, KMNIST, EMNIST, \
-QMNIST, FakeData, CocoCaptions, CocoDetection, LSUN, ImageNet, CIFAR10, \
-CIFAR100, STL10, SVHN, PhotoTour, SBU, Flickr8k, Flickr30k, VOCDetection, \
-VOCSegmentation, Cityscapes, SBDataset, USPS, HMDB51, UCF101, \
-CelebA, CORe50Dataset, TinyImagenet, CUB200, OpenLORIS
-
-from avalanche.benchmarks.generators import nc_benchmark, ni_benchmark
-from torchvision.transforms import Compose, ToTensor, Normalize, RandomCrop
-from torch.utils.data import DataLoader, Subset
-from sklearn.model_selection import train_test_split
-from avalanche.benchmarks.utils import AvalancheDataset
-from torchvision import transforms
-import pandas as pd
-import time
-from vae_model import VAE
 from vae_training import Vae_Cls_Generator
-from utils import utility_funcs, CustomDatasetForDataLoader
+from argparse import ArgumentParser
 from controlBoxUtils import GripperData
+from cls_inhibition_algo import CustomInhibitStrategy
+from avalanche.benchmarks.generators import nc_benchmark
+from sklearn.model_selection import train_test_split
+from utils import utility_funcs, CustomDatasetForDataLoader
 utility_funcs = utility_funcs()
 
 class SynapNet():
     def __init__(self):
 
-        ## CLS Model Parameters
+        # CLS Model Parameters
         # knownLabelsListInitial = utility_funcs.readList()
         self.device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
         self.num_epochs = 250 
@@ -179,17 +169,29 @@ class SynapNet():
         return y_stable, y_plastic, cls_output, self.n_experiences, self.test_stream, self.n_classes
 
 def main():
-    Uk_classExpPhase = False
+    # Acquire the arguments
+    parser = ArgumentParser(description="SynapNet Application")
+    parser.add_argument("--pseudo_exp", type=bool, required=True, help="Perform pseudo experiment instead of real-time",
+                        choices=[True, False])
+    parser.add_argument("--Uk_classExpPhase", type=bool, required=True, help="Perform dynamic model expansion for new classes",
+                        choices=[True, False])
+    parser.add_argument("--num_runs", type=int, required=False, help="Number of runs for intial experience training",
+                        default=1)
+    args = parser.parse_args()
+
+    Uk_classExpPhase = args.Uk_classExpPhase
+    pseudo_exp = args.pseudo_exp
+    num_runs = args.num_runs
+    counter = 0
     stablePredN = []
     plasticPredN = []
     cls_outputPredN = []
-    num_runs = 1
-    counter=0
+    
+    # Call the parent class 
     newExpLearner = SynapNet()
     
-    ## Control Box, Sensor call
+    # Control Box, Sensor call
     data_acquisition = GripperData()
-
     for i in range(num_runs):
         print("*"*10)
         print(f" Starting Repeatation Number {counter} out of {num_runs}")
@@ -236,12 +238,14 @@ def main():
             y_stableAkt, y_plasticAkt, cls_outputAkt, knownLabelsList = utility_funcs.OnlineTest(threshold = 0.30, 
                                                                                 expTestStream = test_streamExp, 
                                                                                 labelsUk_trainTest = newClass, 
-                                                                                totalClasses=  n_classes, num_syntheticExamplesPerDigit = 10, 
+                                                                                totalClasses=  n_classes, 
+                                                                                num_syntheticExamplesPerDigit = 10, 
                                                                                 acquisition_function = data_acquisition, 
                                                                                 knownLabelsList=knownLabelsListInitial,
                                                                                 customCLSobj = CustomInhibitStrategy, aportFS="COM4", 
-                                                                                num_originalExamplesPerDigit = 5,
-                                                                                aportPB="COM3", train_itr=10, test_itr=3, in_dim=600)
+                                                                                num_originalExamplesPerDigit = 5, aportPB="COM3", 
+                                                                                pseudo_exp=pseudo_exp, train_itr=10, test_itr=3, 
+                                                                                in_dim=600)
         print(f"The classes seen so far are {knownLabelsList}")
         utility_funcs.writeList(knownLabelsList)
 

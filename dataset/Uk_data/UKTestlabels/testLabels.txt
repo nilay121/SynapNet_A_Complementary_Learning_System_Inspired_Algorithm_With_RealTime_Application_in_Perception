@@ -13,13 +13,3 @@ air_guage
 big_cuboid
 plier
 ball
-ethernet_adapter
-mouse
-screwdriver
-univ_adapter
-metallic_pipe
-small_beaker
-battery
-pendrive
-silicon_block
-bottle_cap

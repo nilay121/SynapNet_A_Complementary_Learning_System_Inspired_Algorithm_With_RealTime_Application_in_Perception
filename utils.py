@@ -1,3 +1,7 @@
+import time
+import copy
+import os
+import pandas as pd
 import numpy as np
 import torch
 import torch.nn.functional as F
@@ -6,10 +10,6 @@ from torch.nn import BCELoss
 from torch.utils.data import DataLoader, Subset
 from torch.utils.data import Dataset
 from tqdm import tqdm
-import time
-import copy
-import os
-import pandas as pd
 import matplotlib.pyplot as plt
 from sklearn.metrics import ConfusionMatrixDisplay
 from sklearn.metrics import confusion_matrix
@@ -364,8 +364,7 @@ class utility_funcs:
 
     def OnlineTest(self, threshold, expTestStream, labelsUk_trainTest, num_syntheticExamplesPerDigit, customCLSobj, 
                    acquisition_function, totalClasses, knownLabelsList, num_originalExamplesPerDigit, in_dim, 
-                   aportPB="COM3", aportFS="COM4", train_itr=50, 
-                   test_itr=3):
+                   aportPB="COM3", aportFS="COM4", train_itr=50, test_itr=3, pseudo_exp=False):
         ## Parameters
         batch_sizeGR = 16
         num_epochs = 110
@@ -409,11 +408,23 @@ class utility_funcs:
         gen_class = Vae_Cls_Generator(num_epochs=num_epochs, model=gen_model, device=self.device, learning_rate=learning_rateGR, 
                                       batch_size=batch_sizeGR, patience=100 )
         ## Data collection in real time for testing
-        testFileName = acquisition_function.StartExpGeneration(itr=test_itr, filename=f"test_object{labelsUk_trainTest}.csv", 
-                                                               aportPB=aportPB, aportFS=aportFS, uk_objectName = labelsUk_trainTest, 
-                                                               training=False)
-        testDataUk = self.Uk_dataTrainTest(sensorDataFile=testFileName, labelsUk_trainTest=labelsUk_trainTest, 
-                                           trained_labelsExp=knownLabelsList, training=False, newIdx=newIdx)
+        if not pseudo_exp:
+            # real-time experiment
+            testFileName = acquisition_function.StartExpGeneration(itr=test_itr, filename=f"test_object{labelsUk_trainTest}.csv", 
+                                                                aportPB=aportPB, aportFS=aportFS, uk_objectName = labelsUk_trainTest, 
+                                                                training=False)    
+            testDataUk = self.Uk_dataTrainTest(sensorDataFile=testFileName, labelsUk_trainTest=labelsUk_trainTest, 
+                                            trained_labelsExp=knownLabelsList, training=False, newIdx=newIdx)      
+        elif pseudo_exp:
+            # perform pseudo experiment
+            print("#"*10,"Collection complete!! Loading the data!!","#"*10)
+            testDataUk = self.Uk_dataTrainTest(sensorDataFile=f"dataset/Uk_data/test/test_object{labelsUk_trainTest}.csv", 
+                                                labelsUk_trainTest=labelsUk_trainTest, trained_labelsExp=knownLabelsList, 
+                                                training=False, newIdx=newIdx)
+            print("#"*10,"Starting training on the unknown data","#"*10)
+        else:
+            raise NotImplementedError("Wrong selection!!")
+
         # newClasses = len(pd.Series(testDataUk.targets).unique())
         acc_dict, modelPred, _ = cl_strategy.evaluateUnknown(batch_size=32, test_stream=testDataUk)
         
@@ -431,13 +442,24 @@ class utility_funcs:
             trainNewObj = True
             print("#"*10,"Collecting real time data from the gripper","#"*10)
             ## Data collection in real time for training
-            trainFileName = acquisition_function.StartExpGeneration(itr=train_itr, filename=f"train_object{labelsUk_trainTest}.csv", 
-                                                               aportPB=aportPB, aportFS=aportFS, uk_objectName = labelsUk_trainTest, 
-                                                               training=True)            
-            print("#"*10,"Collection complete!! Loading the data!!","#"*10)
-            trainDataUk = self.Uk_dataTrainTest(sensorDataFile=trainFileName, labelsUk_trainTest=labelsUk_trainTest, 
-                                                trained_labelsExp=knownLabelsList, training=True, newIdx=newIdx)
-            print("#"*10,"Starting training on the unknown data","#"*10)
+            if not pseudo_exp:
+                # real-time experiment
+                trainFileName = acquisition_function.StartExpGeneration(itr=train_itr, filename=f"train_object{labelsUk_trainTest}.csv", 
+                                                                aportPB=aportPB, aportFS=aportFS, uk_objectName = labelsUk_trainTest, 
+                                                                training=True)            
+                print("#"*10,"Collection complete!! Loading the data!!","#"*10)
+                trainDataUk = self.Uk_dataTrainTest(sensorDataFile=trainFileName, labelsUk_trainTest=labelsUk_trainTest, 
+                                                    trained_labelsExp=knownLabelsList, training=True, newIdx=newIdx)
+                print("#"*10,"Starting training on the unknown data","#"*10)
+            elif pseudo_exp:
+                # perform pseudo experiment
+                print("#"*10,"Collection complete!! Loading the data!!","#"*10)
+                trainDataUk = self.Uk_dataTrainTest(sensorDataFile=f"dataset/Uk_data/train/train_object{labelsUk_trainTest}.csv", 
+                                                    labelsUk_trainTest=labelsUk_trainTest, trained_labelsExp=knownLabelsList, 
+                                                    training=True, newIdx=newIdx)
+                print("#"*10,"Starting training on the unknown data","#"*10)
+            else:
+                raise NotImplementedError("Wrong selection!!")
 
             scenarioTestUK = nc_benchmark(trainDataUk, trainDataUk, n_experiences=1, shuffle=False, seed=9, task_labels=False)
             train_stream = scenarioTestUK.train_stream
