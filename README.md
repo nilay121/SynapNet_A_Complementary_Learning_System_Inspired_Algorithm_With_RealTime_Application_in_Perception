@@ -6,7 +6,17 @@ Application of the SynapNet algorithm to classify a wide range of objects increm
 
 ## Dataset
 
-The dataset used for training the SynapNet algorithm offline is provided in the "dataset" folder.
+The dataset used for training the SynapNet algorithm offline is provided in the "dataset" folder. The new unseen objects are :
+- ethernet_adapter
+- mouse
+- screwdriver
+- univ_adapter
+- metallic_pipe
+- small_beaker
+- battery
+- pendrive
+- silicon_block
+- bottle_cap
 
 ## Install the dependencies in a virtual environment
 
