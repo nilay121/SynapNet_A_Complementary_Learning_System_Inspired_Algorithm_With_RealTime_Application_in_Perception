@@ -1,6 +1,6 @@
 # SynapNet_ApplicationOnGripper
 
-Application of the SynapNet algorithm to classify a wide range of objects incrementally in a real-time dynamic environment using a soft pneumatic gripper equipped with two flex sensors and two force sensors. More details about the application are provided in the paper "".
+Application of the SynapNet algorithm to classify a wide range of objects incrementally in a real-time dynamic environment using a soft pneumatic gripper equipped with two flex sensors and two force sensors. More details about the application are provided in the paper "SynapNet: A Complementary Learning System Inspired Algorithm with Real-Time Application in Multimodal Perception".
 
 ## Framework
 ![](https://github.com/nilay121/SynapNet_ApplicationOnGripper/blob/main/synapnet_gif.gif)
