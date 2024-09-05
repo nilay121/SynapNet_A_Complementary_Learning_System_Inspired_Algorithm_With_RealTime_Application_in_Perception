@@ -54,4 +54,14 @@ The dataset used for training the SynapNet algorithm offline is provided in the 
   
 ## To cite the paper
   ```bash
+@ARTICLE{10649896,
+  author={Kushawaha, Nilay and Fruzzetti, Lorenzo and Donato, Enrico and Falotico, Egidio},
+  journal={IEEE Transactions on Neural Networks and Learning Systems}, 
+  title={SynapNet: A Complementary Learning System Inspired Algorithm With Real-Time Application in Multimodal Perception}, 
+  year={2024},
+  volume={},
+  number={},
+  pages={1-15},
+  keywords={Task analysis;Training;Heuristic algorithms;Data models;Brain modeling;Real-time systems;Feature extraction;Catastrophic forgetting;complementary learning system (CLS);continual learning (CL);perception;pseudo episodic memory;soft gripper;variational autoencoder (VAE)},
+  doi={10.1109/TNNLS.2024.3446171}}
   ```
