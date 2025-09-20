@@ -1,6 +1,28 @@
-# SynapNet_ApplicationOnGripper
+# SynapNet: A Complementary Learning System Inspired Algorithm With Real-Time Application in Multimodal Perception
 
-Application of the SynapNet algorithm to classify a wide range of objects incrementally in a real-time dynamic environment using a soft pneumatic gripper equipped with two flex sensors and two force sensors. More details about the application are provided in the paper "SynapNet: A Complementary Learning System Inspired Algorithm with Real-Time Application in Multimodal Perception".
+Catastrophic forgetting is a phenomenon in which a neural network, upon learning a new task, struggles to maintain it's performance on previously learned tasks. It is a common
+challenge in the realm of continual learning (CL) through neural networks. The mammalian brain addresses catastrophic
+forgetting by consolidating memories in different parts of the
+brain, involving the hippocampus and the neocortex. Taking
+inspiration from this brain strategy, we present a CL framework
+that combines a plastic model simulating the fast learning
+capabilities of the hippocampus and a stable model representing
+the slow consolidation nature of the neocortex. To supplement
+this, we introduce a variational autoencoder (VAE)-based pseudo
+memory for rehearsal purposes. In addition by applying lateral
+inhibition masks on the gradients of the convolutional layer,
+we aim at damping the activity of adjacent neurons and intro-
+duce a sleep phase to reorganize the learned representations.
+Empirical evaluation demonstrates the positive impact of such
+additions on the performance of our proposed framework; we
+evaluate the proposed model on several class-incremental and
+domain-incremental datasets and compare it with the standard
+benchmark algorithms, showing significant improvements. With
+the aim to showcase practical applicability, we implement the
+algorithm in a physical environment for object classification
+using a soft pneumatic gripper. The algorithm learns new classes
+incrementally in real time and also exhibits significant backward
+knowledge transfer (KT).
 
 ## Framework
 ![](https://github.com/nilay121/SynapNet_ApplicationOnGripper/blob/main/synapnet_gif.gif)
